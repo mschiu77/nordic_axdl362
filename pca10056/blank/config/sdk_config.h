@@ -5190,6 +5190,89 @@
 #define SEGGER_RTT_CONFIG_DEFAULT_MODE 0
 #endif
 
+#ifndef SPI_SCK_PIN
+#define SPI_SCK_PIN 26
+#endif
+
+#ifndef SPI_MISO_PIN
+#define SPI_MISO_PIN 30
+#endif
+
+#ifndef SPI_MOSI_PIN
+#define SPI_MOSI_PIN 29
+#endif
+
+#ifndef SPI_SS_PIN
+#define SPI_SS_PIN 31
+#endif
+
+#ifndef SPI_IRQ_PRIORITY
+#define SPI_IRQ_PRIORITY 6
+#endif
+
+#define SPI_ENABLED  1
+// <e> SPI0_ENABLED - Enable SPI0 instance
+//==========================================================
+#define SPI0_ENABLED 1
+
+// <q> SPI0_USE_EASY_DMA  - Use EasyDMA
+#define SPI0_USE_EASY_DMA 1
+
+// <o> SPI_CONFIG_LOG_LEVEL  - Default Severity level
+// <0=> Off
+// <1=> Error
+// <2=> Warning
+// <3=> Info
+// <4=> Debug
+#ifndef SPI_CONFIG_LOG_LEVEL
+#define SPI_CONFIG_LOG_LEVEL 3
+#endif
+
+#ifndef SPI_IRQ_PRIORITY
+#define SPI_IRQ_PRIORITY 6
+#endif
+
+#define SPI_ENABLED  1
+// <e> SPI0_ENABLED - Enable SPI0 instance
+//==========================================================
+#define SPI0_ENABLED 1
+
+// <q> SPI0_USE_EASY_DMA  - Use EasyDMA
+#define SPI0_USE_EASY_DMA 1
+
+// <o> SPI_CONFIG_LOG_LEVEL  - Default Severity level
+// <0=> Off
+// <1=> Error
+// <2=> Warning
+// <3=> Info
+// <4=> Debug
+#ifndef SPI_CONFIG_LOG_LEVEL
+#define SPI_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> SPI_DEFAULT_CONFIG_IRQ_PRIORITY  - Interrupt priority
+// <0=> 0 (highest)
+// <1=> 1
+// <2=> 2
+// <3=> 3
+// <4=> 4
+// <5=> 5
+// <6=> 6
+// <7=> 7
+
+#ifndef SPI_DEFAULT_CONFIG_IRQ_PRIORITY
+#define SPI_DEFAULT_CONFIG_IRQ_PRIORITY 6
+#endif
+
+// <o> NRFX_SPIM_MISO_PULL_CFG  - MISO pin pull configuration.
+// <0=> NRF_GPIO_PIN_NOPULL
+// <1=> NRF_GPIO_PIN_PULLDOWN
+// <3=> NRF_GPIO_PIN_PULLUP
+#ifndef NRFX_SPIM_MISO_PULL_CFG
+#define NRFX_SPIM_MISO_PULL_CFG 1
+#endif
+
+
 // </h> 
 //==========================================================
 
