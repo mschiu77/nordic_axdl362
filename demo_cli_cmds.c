@@ -55,6 +55,78 @@ static uint8_t m_dynamic_cmd_cnt;
 uint32_t m_counter;
 bool     m_counter_active = false;
 
+bool     adxl362_start_read = false;
+
+static void cmd_adxl_start(nrf_cli_t const * p_cli, size_t argc, char **argv)
+{
+    if (argc != 1)
+    {
+        nrf_cli_error(p_cli, "%s: bad parameter count", argv[0]);
+        return;
+    }
+
+    adxl362_start_read = true;
+}
+
+static void cmd_adxl_stop(nrf_cli_t const * p_cli, size_t argc, char **argv)
+{
+    if (argc != 1)
+    {
+        nrf_cli_error(p_cli, "%s: bad parameter count", argv[0]);
+        return;
+    }
+
+    adxl362_start_read = false;
+}
+
+NRF_CLI_CREATE_STATIC_SUBCMD_SET(m_sub_adxl)
+{
+    NRF_CLI_CMD(start,  NULL, "Start axdl reader.",  cmd_adxl_start),
+    NRF_CLI_CMD(stop,   NULL, "Stop adxl reader.",   cmd_adxl_stop),
+    NRF_CLI_SUBCMD_SET_END
+};
+
+static void cmd_adxl(nrf_cli_t const * p_cli, size_t argc, char **argv)
+{
+    ASSERT(p_cli);
+    ASSERT(p_cli->p_ctx && p_cli->p_iface && p_cli->p_name);
+
+    /* Extra defined dummy option */
+    static const nrf_cli_getopt_option_t opt[] = {
+        NRF_CLI_OPT(
+            "--test",
+            "-t",
+            "dummy option help string"
+        )
+    };
+
+    if ((argc == 1) || nrf_cli_help_requested(p_cli))
+    {
+        nrf_cli_help_print(p_cli, opt, ARRAY_SIZE(opt));
+        return;
+    }
+
+    if (argc != 2)
+    {
+        nrf_cli_error(p_cli, "%s: bad parameter count", argv[0]);
+        return;
+    }
+
+    if (!strcmp(argv[1], "-t") || !strcmp(argv[1], "--test"))
+    {
+        nrf_cli_print(p_cli, "Dummy test option.");
+        return;
+    }
+
+    /* subcommands have their own handlers and they are not processed here */
+    nrf_cli_error(p_cli, "%s: unknown parameter: %s", argv[0], argv[1]);
+}
+
+NRF_CLI_CMD_REGISTER(adxl,
+                     &m_sub_adxl,
+                     "Display adxl reading on terminal screen",
+                     cmd_adxl);
+
 /* Command handlers */
 static void cmd_print_param(nrf_cli_t const * p_cli, size_t argc, char **argv)
 {
