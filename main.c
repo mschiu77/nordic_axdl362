@@ -81,6 +81,8 @@
 #include "app_usbd_cdc_acm.h"
 #endif //CLI_OVER_USB_CDC_ACM
 
+#include "pca10056/blank/ses/adxl362.h"
+
 #if defined(TX_PIN_NUMBER) && defined(RX_PIN_NUMBER)
 #define CLI_OVER_UART 1
 #else
@@ -115,6 +117,10 @@ APP_TIMER_DEF(m_timer_0);
 /* Declared in demo_cli.c */
 extern uint32_t m_counter;
 extern bool m_counter_active;
+
+/* ADXL362 read timer. */
+APP_TIMER_DEF(adxl_timer_0);
+extern bool adxl362_start_read;
 
 #if CLI_OVER_USB_CDC_ACM
 
@@ -193,6 +199,20 @@ static void timer_handle(void * p_context)
         m_counter++;
         NRF_LOG_RAW_INFO("counter = %d\n", m_counter);
     }
+}
+
+static void adxl_timer_handle(void * p_context)
+{
+    int16_t x = 0, y = 0, z = 0;
+    UNUSED_PARAMETER(p_context);
+
+    if (is_adxl_inited() && adxl362_start_read)
+    {
+        adxl_get_xyz(&x, &y, &z);
+        NRF_LOG_RAW_INFO("x: %d y: %d z:　%d\n", x, y, z);
+    }
+//    else
+//        NRF_LOG_RAW_INFO("ADXL362 not even started");
 }
 
 static void cli_start(void)
@@ -346,6 +366,14 @@ int main(void)
     APP_ERROR_CHECK(ret);
 
     ret = app_timer_start(m_timer_0, APP_TIMER_TICKS(1000), NULL);
+    APP_ERROR_CHECK(ret);
+
+    adxl362_init();
+
+    ret = app_timer_create(&adxl_timer_0, APP_TIMER_MODE_REPEATED, adxl_timer_handle);
+    APP_ERROR_CHECK(ret);
+
+    ret = app_timer_start(adxl_timer_0, APP_TIMER_TICKS(500), NULL);
     APP_ERROR_CHECK(ret);
 
     cli_init();
