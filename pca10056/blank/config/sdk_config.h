@@ -5191,15 +5191,15 @@
 #endif
 
 #ifndef SPI_SCK_PIN
-#define SPI_SCK_PIN 26
+#define SPI_SCK_PIN 3
 #endif
 
 #ifndef SPI_MISO_PIN
-#define SPI_MISO_PIN 30
+#define SPI_MISO_PIN 4
 #endif
 
 #ifndef SPI_MOSI_PIN
-#define SPI_MOSI_PIN 29
+#define SPI_MOSI_PIN 28
 #endif
 
 #ifndef SPI_SS_PIN
