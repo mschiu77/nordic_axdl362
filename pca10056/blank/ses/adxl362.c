@@ -63,9 +63,10 @@ static void adxl362_set_reg(uint8_t addr, uint16_t val, uint8_t size)
     m_tx_buf[1] = addr;
     m_tx_buf[2] = val & 0x00ff;
     m_tx_buf[3] = val >> 8;
+    tx_len = 4;
 
     spi_xfer_done = false;
-    APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, m_tx_buf, size, m_rx_buf, 0));
+    APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, m_tx_buf, tx_len, m_rx_buf, 0));
     while (!spi_xfer_done)
     {
       __WFE();
