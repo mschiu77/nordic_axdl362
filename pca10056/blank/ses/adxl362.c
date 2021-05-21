@@ -19,7 +19,7 @@ static bool adxl362_inited = false;
 
 static uint8_t       m_tx_buf[ADXL_MAX_CMD_LEN];    /**< TX buffer. */
 static uint8_t       m_rx_buf[ADXL_MAX_CMD_LEN];    /**< RX buffer. */
-static uint8_t       m_length;                      /**< Tx/Rx buffer length  */
+static uint8_t       tx_len;
 
 static void spi_event_handler(nrf_drv_spi_evt_t const * p_event,
                        void *                    p_context)
@@ -33,59 +33,44 @@ static void spi_event_handler(nrf_drv_spi_evt_t const * p_event,
     }
 }
 
-static void spi_read(uint8_t addr, uint8_t *buf, uint8_t size)
-{
-    spi_xfer_done = false;
-
-    memset(m_rx_buf, 0, ADXL_MAX_CMD_LEN);
-    APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, m_tx_buf, m_length, m_rx_buf, size));
-
-    while (!spi_xfer_done)
-    {
-      __WFE();
-    }
-    NRF_LOG_FLUSH();
-
-    memcpy(buf, m_rx_buf, size);
-
-}
-
-static void spi_write(uint8_t addr, uint8_t *buf, uint8_t size)
-{
-    spi_xfer_done = false;
-
-    memset(m_rx_buf, 0, ADXL_MAX_CMD_LEN);
-    APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, buf, size, m_rx_buf, 0));
-
-    while (!spi_xfer_done)
-    {
-      __WFE();
-    }
-    NRF_LOG_FLUSH();
-}
-
 static void adxl362_get_reg(uint8_t addr, uint8_t *val, uint8_t size)
 {
+    memset(m_tx_buf, 0, ADXL_MAX_CMD_LEN);
     m_tx_buf[0] = ADXL362_READ_REG;
     m_tx_buf[1] = addr;
-    m_length = 2;
+    tx_len = 2;
 
-    if (size > 32) {
-      NRF_LOG_INFO("AXDL362 get reg size should not exceed 32.");
+    if (size > ADXL_MAX_CMD_LEN) {
+      NRF_LOG_INFO("AXDL362 get reg size should not exceed %d.", ADXL_MAX_CMD_LEN);
       return;
     }
 
-    spi_read(ADXL362_SLAVE_ID, val, size);
+    spi_xfer_done = false;
+    APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, m_tx_buf, tx_len, m_rx_buf, tx_len + size));
+    while (!spi_xfer_done)
+    {
+      __WFE();
+    }
+    NRF_LOG_FLUSH();
+
+    memcpy(val, m_rx_buf + tx_len, size);
 }
 
 static void adxl362_set_reg(uint8_t addr, uint16_t val, uint8_t size)
 {
+    memset(m_tx_buf, 0, ADXL_MAX_CMD_LEN);
     m_tx_buf[0] = ADXL362_WRITE_REG;
     m_tx_buf[1] = addr;
     m_tx_buf[2] = val & 0x00ff;
     m_tx_buf[3] = val >> 8;
 
-    spi_write(ADXL362_SLAVE_ID, m_tx_buf, size + 2);
+    spi_xfer_done = false;
+    APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, m_tx_buf, size, m_rx_buf, 0));
+    while (!spi_xfer_done)
+    {
+      __WFE();
+    }
+    NRF_LOG_FLUSH();
 }
 
 int adxl362_init(void)
@@ -106,6 +91,7 @@ int adxl362_init(void)
     // Write to SOFT RESET, "R"
     unsigned short reset = ADXL362_RESET_KEY;
     adxl362_set_reg(ADXL362_REG_SOFT_RESET, reset, 1);
+    nrf_delay_ms(10);
 
 
     adxl362_get_reg(ADXL362_REG_PARTID, &partid, 1);
