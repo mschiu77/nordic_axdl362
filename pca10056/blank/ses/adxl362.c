@@ -75,8 +75,10 @@ static void adxl362_set_reg(uint8_t addr, uint16_t val, uint8_t size)
 
 int adxl362_init(void)
 {
-    uint8_t partid;
+    uint8_t partid, devid_ad, devid_mst = 0;
     uint8_t regval; 
+
+    partid = devid_ad = devid_mst = 0;
 
     nrf_drv_spi_config_t spi_config = NRF_DRV_SPI_DEFAULT_CONFIG;
     spi_config.ss_pin   = SPI_SS_PIN;
@@ -93,9 +95,13 @@ int adxl362_init(void)
     adxl362_set_reg(ADXL362_REG_SOFT_RESET, reset, 1);
     nrf_delay_ms(10);
 
-
     adxl362_get_reg(ADXL362_REG_PARTID, &partid, 1);
-    if((partid == ADXL362_PART_ID)) {
+    adxl362_get_reg(ADXL362_REG_DEVID_AD, &devid_ad, 1);
+    adxl362_get_reg(ADXL362_REG_DEVID_MST, &devid_mst, 1);
+
+    if((partid == ADXL362_PART_ID) && (devid_ad == ADXL362_DEVICE_AD)
+	&& (devid_mst == ADXL362_DEVICE_MST))
+    {
       adxl362_inited = true;    
       NRF_LOG_RAW_INFO("AXDL362 reset done.");
       nrf_delay_ms(10);
@@ -105,6 +111,11 @@ int adxl362_init(void)
 
       adxl362_get_reg(ADXL362_REG_FILTER_CTL, &regval, 1);
       NRF_LOG_RAW_INFO("AXDL362 range and output rate 0x%x.", regval);
+
+      // Set Measure On
+      adxl362_set_reg(ADXL362_REG_POWER_CTL,
+		regval | ADXL362_POWER_CTL_MEASURE(ADXL362_MEASURE_ON), 1);
+      adxl362_get_reg(ADXL362_REG_POWER_CTL, &regval, 1);
       
       return 0;
     }
